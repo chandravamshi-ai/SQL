@@ -1,4 +1,4 @@
-Sure, understanding the order of execution in SQL queries is crucial for advanced query writing and optimization. Here’s a detailed explanation, step-by-step, with examples.
+Understanding the order of execution in SQL queries is crucial for advanced query writing and optimization. Here’s a detailed explanation, step-by-step, with examples.
 
 ### SQL Query Execution Order
 
