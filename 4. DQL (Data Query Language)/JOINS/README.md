@@ -1,4 +1,3 @@
-
 ### Introduction to Joins
 
 Joins are used to retrieve data from two or more tables based on a related column. They allow you to create a relationship between tables and fetch data that is stored across these tables in a meaningful way.
@@ -247,8 +246,6 @@ ORDER BY classes.class_name;
 - **RIGHT JOIN**: Returns all rows from the right table, with matched rows from the left table.
 - **FULL JOIN**: Returns all rows when there is a match in either table.
 - **CROSS JOIN**: Returns the Cartesian product of the two tables.
-- **SELF
-
- JOIN**: Joins a table with itself for comparison within the same table.
+- **SELF JOIN**: Joins a table with itself for comparison within the same table.
 
 Understanding these joins allows you to effectively query and retrieve data from multiple tables in a relational database, providing a comprehensive and flexible way to analyze and manipulate data.
