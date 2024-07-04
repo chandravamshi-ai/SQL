@@ -106,3 +106,111 @@ Roles provide a flexible way to manage permissions:
 
 ### Conclusion
 Users and roles are essential components of database security and access management. By using roles, database administrators can efficiently manage permissions for multiple users, ensuring that each user has the appropriate access to perform their tasks without compromising security. Understanding and utilizing these concepts helps maintain a well-organized and secure database environment.
+
+---
+
+## Comprehensive Guide to Granting Permissions on Multiple Database Objects
+
+### Introduction
+Granting permissions to users or roles in a database can go beyond individual tables. Often, you may need to grant access to multiple tables, entire schemas, or even the entire database. This guide will explain how to manage such permissions effectively.
+
+### Granting Permissions on Multiple Tables
+You can grant permissions on multiple tables to a user or role using a single command. This is efficient when you need to apply the same permissions across several tables.
+
+#### Example
+Assume you have the following tables in a database:
+- `employees`
+- `departments`
+- `salaries`
+
+To grant SELECT and INSERT permissions on all three tables to a user `john_doe`:
+
+```sql
+GRANT SELECT, INSERT ON employees, departments, salaries TO john_doe;
+```
+
+### Granting Permissions on Schemas
+A schema is a collection of database objects, including tables, views, and procedures. Granting permissions on a schema allows a user or role to access all objects within that schema.
+
+#### Example
+To grant all permissions on a schema named `hr` to a role `hr_manager`:
+
+```sql
+GRANT ALL PRIVILEGES ON SCHEMA hr TO hr_manager;
+```
+
+This command ensures that `hr_manager` can perform any action on any object within the `hr` schema.
+
+### Granting Permissions on the Entire Database
+In some cases, you may need to grant permissions on all objects within the entire database. This is typically done for administrative roles.
+
+#### Example
+To grant all privileges on the entire database to a role `admin_role`:
+
+```sql
+GRANT ALL PRIVILEGES ON DATABASE your_database_name TO admin_role;
+```
+
+Replace `your_database_name` with the actual name of your database.
+
+### Using Wildcards for Granting Permissions
+In some database systems, you can use wildcards to grant permissions on objects that follow a certain naming pattern. However, the support for wildcards and their syntax can vary between database systems (e.g., MySQL, PostgreSQL, Oracle).
+
+#### Example (PostgreSQL)
+In PostgreSQL, you can grant permissions on all tables in a schema using a wildcard:
+
+```sql
+DO $$
+DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public')
+    LOOP
+        EXECUTE 'GRANT SELECT ON ' || quote_ident(r.tablename) || ' TO john_doe';
+    END LOOP;
+END $$;
+```
+
+### Advanced Permission Management
+#### Granting Privileges with Inheritance
+When you grant a role to a user, that user can inherit the permissions of the role. This makes it easier to manage permissions hierarchically.
+
+#### Example
+1. **Create Roles**:
+    ```sql
+    CREATE ROLE read_access;
+    CREATE ROLE write_access;
+    ```
+
+2. **Grant Permissions to Roles**:
+    ```sql
+    GRANT SELECT ON ALL TABLES IN SCHEMA public TO read_access;
+    GRANT INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO write_access;
+    ```
+
+3. **Assign Roles to Users**:
+    ```sql
+    GRANT read_access TO john_doe;
+    GRANT write_access TO jane_smith;
+    ```
+
+Now, `john_doe` has read access to all tables in the `public` schema, and `jane_smith` has write access to all tables in the `public` schema.
+
+### Revoke Permissions
+Just as you grant permissions, you can revoke them. This is useful for maintaining security and ensuring that users or roles only have the necessary permissions.
+
+#### Example
+To revoke all permissions on the `employees` table from `john_doe`:
+
+```sql
+REVOKE ALL PRIVILEGES ON employees FROM john_doe;
+```
+
+To revoke a role from a user:
+
+```sql
+REVOKE read_access FROM john_doe;
+```
+
+### Summary
+Granting and managing permissions on multiple database objects such as tables, schemas, or the entire database is crucial for effective database administration. By using roles, schemas, and advanced commands, you can efficiently manage user permissions, ensuring security and operational efficiency.
