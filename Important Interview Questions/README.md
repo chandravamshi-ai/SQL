@@ -741,3 +741,171 @@ FROM TableB;
 ```
 
 ---
+
+
+### **Basic SQL Normalization Forms**
+
+Normalization is the process of organizing data in a database to reduce redundancy and improve data integrity. It is typically achieved by dividing larger tables into smaller, related tables and defining relationships between them.
+
+
+
+### **Normalization Forms (NF)**
+
+1. **First Normal Form (1NF)**
+2. **Second Normal Form (2NF)**
+3. **Third Normal Form (3NF)**
+4. **Boyce-Codd Normal Form (BCNF)** (An extension of 3NF)
+
+
+
+### **Detailed Explanation with Examples**
+
+#### **1. First Normal Form (1NF)**
+A table is in 1NF if:
+- All rows have unique identifiers (Primary Key).
+- Each column contains **atomic** (indivisible) values.
+- There are no repeating groups or arrays in columns.
+
+**Example (Not in 1NF):**
+| **StudentID** | **Name**     | **Subjects**         |
+|---------------|--------------|----------------------|
+| 1             | Alice        | Math, Science       |
+| 2             | Bob          | English, History    |
+
+**Issues:**
+- Subjects column has multiple values.
+
+**Convert to 1NF:**
+| **StudentID** | **Name**     | **Subject**  |
+|---------------|--------------|--------------|
+| 1             | Alice        | Math         |
+| 1             | Alice        | Science      |
+| 2             | Bob          | English      |
+| 2             | Bob          | History      |
+
+
+
+#### **2. Second Normal Form (2NF)**
+A table is in 2NF if:
+- It is in 1NF.
+- All non-key attributes are **fully functionally dependent** on the primary key (no partial dependencies).
+
+**Example (Not in 2NF):**
+| **OrderID** | **ProductID** | **ProductName** | **OrderDate**  |
+|-------------|---------------|-----------------|----------------|
+| 1           | 101           | Laptop          | 2024-01-01     |
+| 2           | 102           | Smartphone      | 2024-01-02     |
+
+**Issues:**
+- `ProductName` depends only on `ProductID`, not the full composite key (`OrderID`, `ProductID`).
+
+**Convert to 2NF:**
+1. Split the table into two:
+   - Order Table:
+     | **OrderID** | **ProductID** | **OrderDate**  |
+     |-------------|---------------|----------------|
+     | 1           | 101           | 2024-01-01     |
+     | 2           | 102           | 2024-01-02     |
+   - Product Table:
+     | **ProductID** | **ProductName** |
+     |---------------|-----------------|
+     | 101           | Laptop          |
+     | 102           | Smartphone      |
+
+2. Establish relationships using `ProductID`.
+
+
+
+#### **3. Third Normal Form (3NF)**
+A table is in 3NF if:
+- It is in 2NF.
+- There are no **transitive dependencies** (a non-key column depends on another non-key column).
+
+**Example (Not in 3NF):**
+| **EmployeeID** | **Name**  | **Department** | **DeptManager** |
+|----------------|-----------|----------------|-----------------|
+| 1              | Alice     | HR             | John            |
+| 2              | Bob       | IT             | Sarah           |
+
+**Issues:**
+- `DeptManager` depends on `Department`, not directly on `EmployeeID`.
+
+**Convert to 3NF:**
+1. Split the table into two:
+   - Employee Table:
+     | **EmployeeID** | **Name**  | **Department** |
+     |----------------|-----------|----------------|
+     | 1              | Alice     | HR             |
+     | 2              | Bob       | IT             |
+   - Department Table:
+     | **Department** | **DeptManager** |
+     |----------------|-----------------|
+     | HR             | John            |
+     | IT             | Sarah           |
+
+2. Establish relationships using `Department`.
+
+
+#### **4. Boyce-Codd Normal Form (BCNF)**
+A table is in BCNF if:
+- It is in 3NF.
+- Every determinant (a column on which another column is functionally dependent) is a candidate key.
+
+**Example (Not in BCNF):**
+| **StudentID** | **CourseID** | **Instructor** |
+|---------------|--------------|----------------|
+| 1             | C101         | Prof. Smith    |
+| 2             | C102         | Prof. Jones    |
+
+**Issues:**
+- `Instructor` depends on `CourseID`, not the candidate key `StudentID`.
+
+**Convert to BCNF:**
+1. Split the table into two:
+   - Enrollment Table:
+     | **StudentID** | **CourseID** |
+     |---------------|--------------|
+     | 1             | C101         |
+     | 2             | C102         |
+   - Course Table:
+     | **CourseID** | **Instructor** |
+     |--------------|----------------|
+     | C101         | Prof. Smith    |
+     | C102         | Prof. Jones    |
+
+2. Establish relationships using `CourseID`.
+
+
+### **Common Interview Questions**
+
+1. **What is normalization, and why is it important?**
+   - Normalization is the process of organizing data to reduce redundancy and improve data integrity.
+   - It ensures efficient data storage and minimizes anomalies (e.g., update, insert, delete anomalies).
+
+2. **Explain the difference between 1NF, 2NF, and 3NF.**
+   - **1NF:** Eliminate repeating groups, ensure atomic values.
+   - **2NF:** Eliminate partial dependencies (full functional dependency on primary key).
+   - **3NF:** Eliminate transitive dependencies.
+
+3. **What is BCNF, and how does it differ from 3NF?**
+   - BCNF ensures all determinants are candidate keys. It's stricter than 3NF.
+   - In some edge cases, a 3NF table may not satisfy BCNF.
+
+4. **What are the disadvantages of normalization?**
+   - Increased complexity in query writing.
+   - More joins, which can slow down read operations.
+
+5. **When would you denormalize a database?**
+   - To improve read performance in systems where frequent joins are costly.
+
+6. **How does normalization help in avoiding anomalies?**
+   - It avoids:
+     - **Update anomalies:** Ensuring data consistency when modifying values.
+     - **Insert anomalies:** Avoiding the inability to add new data due to missing dependencies.
+     - **Delete anomalies:** Preventing accidental loss of valuable data when deleting rows.
+
+
+### **Advanced Tips**
+- **Denormalization:** Opposite of normalization, used in data warehousing to optimize for read-heavy operations.
+- **Practical Use:** Most real-world databases strike a balance between normalized and denormalized structures for performance.
+
