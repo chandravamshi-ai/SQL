@@ -516,3 +516,228 @@ For such cases, `EXISTS` is safer.
    - It can cause ambiguity, as `NULL IN (1, NULL)` results in `UNKNOWN`.
 
 ---
+
+### **Set Operators in SQL**
+
+Set operators in SQL are used to combine the results of two or more queries. These operators work on the principle of sets (from set theory) and enable comparison or combination of data from multiple `SELECT` statements.
+
+
+### **Types of Set Operators**
+
+1. **`UNION`**
+2. **`UNION ALL`**
+3. **`INTERSECT`**
+4. **`EXCEPT` (or `MINUS` in some databases)**
+
+---
+
+### **Rules for Using Set Operators**
+
+1. **Same Number of Columns:** Each `SELECT` statement must return the same number of columns.
+2. **Compatible Data Types:** The corresponding columns in each `SELECT` must have compatible data types.
+3. **Column Order:** The results are matched by column position, not column name.
+
+
+
+### **Detailed Explanation with Examples**
+
+#### **1. UNION**
+Combines the results of two queries, removing duplicates.
+
+**Syntax:**
+```sql
+SELECT column1, column2
+FROM Table1
+UNION
+SELECT column1, column2
+FROM Table2;
+```
+
+**Example:**
+| **Table A**            | **Table B**            |
+|-------------------------|------------------------|
+| 1 (ID)                 | 2 (ID)                |
+| 2 (ID)                 | 3 (ID)                |
+| 3 (ID)                 | 3 (ID)                |
+
+```sql
+SELECT ID FROM TableA
+UNION
+SELECT ID FROM TableB;
+```
+
+**Result:**
+| **ID** |
+|--------|
+| 1      |
+| 2      |
+| 3      |
+
+- **Duplicates are removed.**
+
+
+
+#### **2. UNION ALL**
+Combines the results of two queries but **does not remove duplicates**.
+
+**Syntax:**
+```sql
+SELECT column1, column2
+FROM Table1
+UNION ALL
+SELECT column1, column2
+FROM Table2;
+```
+
+**Example:**
+```sql
+SELECT ID FROM TableA
+UNION ALL
+SELECT ID FROM TableB;
+```
+
+**Result:**
+| **ID** |
+|--------|
+| 1      |
+| 2      |
+| 3      |
+| 2      |
+| 3      |
+| 3      |
+
+- **Duplicates are retained.**
+
+
+
+#### **3. INTERSECT**
+Returns only the rows that are **common** to both queries.
+
+**Syntax:**
+```sql
+SELECT column1, column2
+FROM Table1
+INTERSECT
+SELECT column1, column2
+FROM Table2;
+```
+
+**Example:**
+```sql
+SELECT ID FROM TableA
+INTERSECT
+SELECT ID FROM TableB;
+```
+
+**Result:**
+| **ID** |
+|--------|
+| 3      |
+
+- **Only the common value (3) is returned.**
+
+
+
+#### **4. EXCEPT (or MINUS)**
+Returns rows from the first query that are **not present** in the second query.
+
+**Syntax:**
+```sql
+SELECT column1, column2
+FROM Table1
+EXCEPT
+SELECT column1, column2
+FROM Table2;
+```
+
+**Example:**
+```sql
+SELECT ID FROM TableA
+EXCEPT
+SELECT ID FROM TableB;
+```
+
+**Result:**
+| **ID** |
+|--------|
+| 1      |
+
+- **Only rows in TableA and not in TableB are returned.**
+
+
+
+### **Comparing Set Operators**
+
+| **Operator**   | **Purpose**                              | **Removes Duplicates?** | **Use Case**                             |
+|-----------------|------------------------------------------|--------------------------|------------------------------------------|
+| `UNION`        | Combines results from two queries.        | Yes                      | Merging data from two tables without duplicates. |
+| `UNION ALL`    | Combines results from two queries.        | No                       | Merging data, allowing duplicates (faster).      |
+| `INTERSECT`    | Returns common rows between two queries.  | Yes                      | Finding overlapping data between tables.         |
+| `EXCEPT`/`MINUS` | Returns rows in the first query, not in the second. | Yes                      | Finding differences in data.                     |
+
+
+
+### **Common Interview Questions**
+
+1. **What are set operators in SQL?**
+   - Operators like `UNION`, `UNION ALL`, `INTERSECT`, and `EXCEPT` that combine results from multiple queries.
+
+2. **What is the difference between `UNION` and `UNION ALL`?**
+   - `UNION` removes duplicates, while `UNION ALL` retains duplicates.
+
+3. **When would you use `INTERSECT`?**
+   - To find rows common to both queries, such as identifying duplicate entries across datasets.
+
+4. **What is the difference between `EXCEPT` and `INTERSECT`?**
+   - `EXCEPT` finds rows in the first query not in the second, while `INTERSECT` finds rows common to both.
+
+5. **How does `EXCEPT` handle duplicates?**
+   - It removes duplicates from the final result.
+
+6. **Can you use `ORDER BY` with set operators?**
+   - Yes, but `ORDER BY` can only appear at the end of the combined query.
+
+7. **What happens if column data types do not match in set operators?**
+   - SQL throws an error. Data types must be compatible.
+
+
+
+### **Advanced Examples**
+
+#### **1. Combining `UNION` and Aggregates**
+Find unique product categories from two tables, sorted by total sales.
+
+```sql
+SELECT Category, SUM(Sales)
+FROM TableA
+GROUP BY Category
+UNION
+SELECT Category, SUM(Sales)
+FROM TableB
+GROUP BY Category
+ORDER BY SUM(Sales) DESC;
+```
+
+#### **2. Using `INTERSECT` for Validation**
+Check employees who work in departments available in another table.
+
+```sql
+SELECT EmployeeID
+FROM Employees
+INTERSECT
+SELECT DepartmentID
+FROM Departments;
+```
+
+#### **3. Using `EXCEPT` to Detect Missing Data**
+Find customers in TableA who have not made purchases in TableB.
+
+```sql
+SELECT CustomerID
+FROM TableA
+EXCEPT
+SELECT CustomerID
+FROM TableB;
+```
+
+---
