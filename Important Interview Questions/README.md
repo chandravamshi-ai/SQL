@@ -158,3 +158,361 @@ FROM EmployeeHierarchy;
    - **View:** Persistent, stored in the database schema for reuse.
 
 ---
+
+
+### **Subqueries in SQL**
+
+A **subquery** (or inner query) is a query nested within another query. It allows you to dynamically fetch data to be used in the outer query. Subqueries can be used in `SELECT`, `FROM`, `WHERE`, or other clauses.
+
+
+
+### **Why Use Subqueries?**
+1. **Dynamic Filtering:** Fetch data for filters dynamically.
+2. **Modular Queries:** Break complex logic into manageable parts.
+3. **Intermediate Results:** Provide data that the outer query can reference.
+
+
+
+### **Types of Subqueries**
+Subqueries can be classified based on where they are used and how they return results.
+
+#### **1. Based on Location**
+- **In the `WHERE` Clause:** Filter rows dynamically.
+- **In the `FROM` Clause:** Use the subquery as a derived table.
+- **In the `SELECT` Clause:** Use the subquery to calculate values dynamically.
+
+#### **2. Based on Result Type**
+- **Single-Row Subqueries:** Return one row with one column.
+- **Multi-Row Subqueries:** Return multiple rows (usually one column).
+- **Multi-Column Subqueries:** Return multiple columns (can be used in `IN` or `EXISTS`).
+- **Correlated Subqueries:** Refer to columns from the outer query, executing once for each row in the outer query.
+
+
+
+### **Examples**
+
+#### **1. Subquery in `WHERE` Clause**
+Find employees who earn more than the average salary.
+
+```sql
+SELECT EmployeeName, Salary
+FROM Employees
+WHERE Salary > (SELECT AVG(Salary) FROM Employees);
+```
+
+- **Explanation:**
+  - Inner query calculates the average salary.
+  - Outer query selects employees whose salaries are above the average.
+
+
+#### **2. Subquery in `FROM` Clause**
+Find regions and the total sales in each region.
+
+```sql
+SELECT Region, TotalSales
+FROM (
+    SELECT Region, SUM(SalesAmount) AS TotalSales
+    FROM Sales
+    GROUP BY Region
+) AS RegionalSales
+WHERE TotalSales > 500;
+```
+
+- **Explanation:**
+  - Inner query calculates the total sales per region.
+  - Outer query filters regions with sales greater than 500.
+
+
+
+#### **3. Subquery in `SELECT` Clause**
+Add the average salary to each employee's details.
+
+```sql
+SELECT EmployeeName, Salary, 
+       (SELECT AVG(Salary) FROM Employees) AS AverageSalary
+FROM Employees;
+```
+
+- **Explanation:**
+  - Subquery calculates the average salary.
+  - Outer query appends the average salary to each employee’s details.
+
+
+
+#### **4. Correlated Subquery**
+Find employees whose salaries are higher than the average salary of their department.
+
+```sql
+SELECT EmployeeName, Salary, DepartmentID
+FROM Employees E1
+WHERE Salary > (
+    SELECT AVG(Salary)
+    FROM Employees E2
+    WHERE E1.DepartmentID = E2.DepartmentID
+);
+```
+
+- **Explanation:**
+  - Inner query calculates the average salary for the department of the current employee (`E1`).
+  - Outer query selects employees with salaries above this average.
+
+
+
+#### **5. `IN` Subquery**
+Find employees who work in departments located in 'New York'.
+
+```sql
+SELECT EmployeeName, DepartmentID
+FROM Employees
+WHERE DepartmentID IN (
+    SELECT DepartmentID
+    FROM Departments
+    WHERE Location = 'New York'
+);
+```
+
+- **Explanation:**
+  - Subquery retrieves department IDs located in 'New York'.
+  - Outer query filters employees working in those departments.
+
+
+#### **6. `EXISTS` Subquery**
+Find departments that have employees.
+
+```sql
+SELECT DepartmentID, DepartmentName
+FROM Departments D
+WHERE EXISTS (
+    SELECT 1
+    FROM Employees E
+    WHERE D.DepartmentID = E.DepartmentID
+);
+```
+
+- **Explanation:**
+  - Subquery checks if there are employees in a department.
+  - Outer query selects only departments that have employees.
+
+
+
+### **Subquery vs JOIN**
+| **Aspect**              | **Subquery**                                      | **JOIN**                                      |
+|--------------------------|--------------------------------------------------|----------------------------------------------|
+| **Use Case**             | Use for nested or dependent logic.               | Use for combining related tables.            |
+| **Performance**          | Often slower, especially for correlated subqueries. | Generally faster due to direct table joins.  |
+| **Readability**          | Easier for smaller, modular logic.               | Better for complex relationships.            |
+| **Result Structure**     | Often single-column/row results.                 | Combines multiple columns from related tables.|
+
+
+
+### **Common Interview Questions About Subqueries**
+
+1. **What is a subquery, and where can it be used?**
+   - A query nested within another query.
+   - Can be used in `WHERE`, `FROM`, `SELECT`, `HAVING`, or other clauses.
+
+2. **What is a correlated subquery?**
+   - A subquery that depends on the outer query for its values.
+   - Executes once for each row in the outer query.
+
+3. **What is the difference between a subquery and a JOIN?**
+   - Subquery: Used for dynamic filters or intermediate results.
+   - JOIN: Used to combine data from related tables.
+
+4. **When would you use a subquery over a JOIN?**
+   - When you need modular logic or intermediate filtering that isn't easily achievable with JOINs.
+
+5. **What is the difference between `IN` and `EXISTS`?**
+   - **`IN`:** Checks if a value is in the result of the subquery.
+   - **`EXISTS`:** Checks if the subquery returns any rows (often more efficient for large datasets).
+
+6. **Can a subquery return multiple rows?**
+   - Yes, if used with `IN`, `EXISTS`, or as part of a derived table.
+
+7. **What happens if a subquery returns multiple rows where a single row is expected?**
+   - SQL throws an error. For instance, this happens if a subquery returns multiple rows in a scalar context (e.g., `= (subquery)`).
+
+8. **How do correlated subqueries impact performance?**
+   - Correlated subqueries can be slow because they execute once for every row in the outer query.
+
+9. **What is the difference between a scalar subquery and a table subquery?**
+   - **Scalar Subquery:** Returns a single value.
+   - **Table Subquery:** Returns a set of rows or columns (used in `FROM`).
+
+10. **Can you use subqueries with aggregate functions?**
+    - Yes, you can use subqueries to provide input for aggregate functions.
+
+---
+
+The difference between **`IN`** and **`EXISTS`** with clear examples and scenarios to help you understand.
+
+
+### **Key Conceptual Differences**
+
+1. **`IN`:**
+   - Compares a value with a list of values returned by a subquery or provided directly.
+   - Returns `TRUE` if the value is **in the list**.
+
+2. **`EXISTS`:**
+   - Tests whether a subquery **returns any rows**.
+   - Returns `TRUE` if the subquery returns **at least one row**.
+
+
+
+### **Detailed Example**
+
+#### **Scenario: Employee and Department Data**
+
+You have two tables:
+
+1. **`Employees` Table:**
+   | **EmployeeID** | **EmployeeName** | **DepartmentID** |
+   |----------------|------------------|-------------------|
+   | 1              | Alice            | 1                 |
+   | 2              | Bob              | 2                 |
+   | 3              | Charlie          | 3                 |
+   | 4              | David            | NULL              |
+
+2. **`Departments` Table:**
+   | **DepartmentID** | **DepartmentName** |
+   |------------------|---------------------|
+   | 1                | HR                  |
+   | 2                | IT                  |
+
+
+
+### **Using `IN`**
+
+**Task:** Find employees who work in departments that exist in the `Departments` table.
+
+#### Query:
+```sql
+SELECT EmployeeName
+FROM Employees
+WHERE DepartmentID IN (
+    SELECT DepartmentID
+    FROM Departments
+);
+```
+
+#### How It Works:
+1. The subquery (`SELECT DepartmentID FROM Departments`) returns a list of valid `DepartmentID`s: `[1, 2]`.
+2. The outer query checks each employee's `DepartmentID` to see if it matches any value in the list `[1, 2]`.
+
+#### **Result:**
+| **EmployeeName** |
+|------------------|
+| Alice            |
+| Bob              |
+
+- Employees in departments `1` and `2` (found in the `Departments` table) are included.
+- **Charlie** and **David** are excluded because their `DepartmentID` is not in the list.
+
+
+
+### **Using `EXISTS`**
+
+**Task:** Achieve the same result using `EXISTS`.
+
+#### Query:
+```sql
+SELECT EmployeeName
+FROM Employees E
+WHERE EXISTS (
+    SELECT 1
+    FROM Departments D
+    WHERE E.DepartmentID = D.DepartmentID
+);
+```
+
+#### How It Works:
+1. For each row in the `Employees` table, the subquery (`SELECT 1 FROM Departments D WHERE E.DepartmentID = D.DepartmentID`) checks if the employee’s `DepartmentID` exists in the `Departments` table.
+2. If the subquery finds **at least one match**, `EXISTS` returns `TRUE`, and the employee is included in the result.
+
+#### **Result:**
+| **EmployeeName** |
+|------------------|
+| Alice            |
+| Bob              |
+
+- Similar to the `IN` result, employees in departments `1` and `2` are included.
+
+
+
+### **Key Difference in How They Work**
+
+#### **1. `IN` Compares Values**
+- The subquery in `IN` returns a **list** of values.
+- The outer query matches a column (e.g., `DepartmentID`) against this list.
+
+#### **2. `EXISTS` Checks for Row Presence**
+- The subquery in `EXISTS` doesn’t return a list. Instead, it simply checks whether any rows exist.
+- If the subquery finds even a single row, it evaluates to `TRUE`.
+
+
+### **Performance Considerations**
+
+#### **When to Use `IN`:**
+- Best for a **small list** of values returned by the subquery.
+- Example: Matching against a short list of IDs.
+
+#### **When to Use `EXISTS`:**
+- Efficient for **large datasets**, especially when:
+  - The subquery checks for a condition using `JOINs` or `WHERE`.
+  - The goal is to test for the **presence of rows** rather than their values.
+
+
+
+### **Edge Case: Null Handling**
+1. If the subquery returns `NULL` values:
+   - `IN` may produce unexpected results because `NULL` can create ambiguity.
+   - `EXISTS` is not affected because it only checks for row presence.
+
+#### **Example with `NULL` Handling**
+
+- Add `DepartmentID = NULL` to the `Departments` table:
+
+| **DepartmentID** | **DepartmentName** |
+|------------------|---------------------|
+| 1                | HR                  |
+| 2                | IT                  |
+| NULL             | Undefined           |
+
+- If you run the `IN` query:
+
+```sql
+SELECT EmployeeName
+FROM Employees
+WHERE DepartmentID IN (
+    SELECT DepartmentID
+    FROM Departments
+);
+```
+
+Result:
+- Alice and Bob are included.
+- No match for `Charlie` or `David`.
+
+- **But `NULL` may cause issues in certain scenarios, leading to incorrect results.**
+
+For such cases, `EXISTS` is safer.
+
+
+
+### **Common Interview Questions**
+
+1. **What is the difference between `IN` and `EXISTS`?**
+   - `IN` compares a value against a list of values.
+   - `EXISTS` checks for the presence of rows.
+
+2. **When would you prefer `EXISTS` over `IN`?**
+   - When dealing with large datasets or subqueries involving complex joins.
+   - When `NULL` handling could cause issues with `IN`.
+
+3. **How does `EXISTS` work internally?**
+   - It stops execution as soon as the subquery finds a single row that matches the condition.
+
+4. **What happens if the subquery in `IN` returns `NULL`?**
+   - It can cause ambiguity, as `NULL IN (1, NULL)` results in `UNKNOWN`.
+
+---
